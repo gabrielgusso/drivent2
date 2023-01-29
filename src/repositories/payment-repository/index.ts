@@ -1,6 +1,7 @@
 import { prisma } from '@/config';
+import { Payment, PaymentBody } from '@/protocols';
 
-async function findPayment(ticketId: number) {
+async function findPayment(ticketId: number): Promise<Payment> {
   return prisma.payment.findFirst({
     where: {
       ticketId,
@@ -8,18 +9,20 @@ async function findPayment(ticketId: number) {
   });
 }
 
-async function createTicket(enrollmentId: number, ticketTypeId: number) {
-  return prisma.ticket.create({
+async function createPayment(payment: PaymentBody, value: number): Promise<Payment> {
+  return prisma.payment.create({
     data: {
-      enrollmentId,
-      ticketTypeId,
-      status: 'RESERVED',
-    },
+      ticketId: payment.ticketId,
+      value,
+      cardIssuer: payment.cardData.issuer,
+      cardLastDigits: payment.cardData.number.toString().slice(-4),
+    }
   });
 }
 
 const paymentRepository = {
   findPayment,
+  createPayment
 };
 
 export default paymentRepository;
